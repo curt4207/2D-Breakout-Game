@@ -1,0 +1,101 @@
+<!--By Curtis Clayton
+    Resources used: MDN Web Docs 2D breakout game using pure javaScript,   -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width", initial-scale=1.0">
+    <title>2D Breakout Game</title>
+    <style>
+        *{padding: 0; margin: 0;}
+        canvas{ background: rgb(17, 15, 15); display: block; margin: 0 auto;}
+    </style>
+</head> 
+<body>
+   <canvas id="myCanvas" width="650" height="800"></canvas>
+   
+   <script>
+// javaScript goes here
+    let canvas =document.getElementById("myCanvas");
+    let ctx = canvas.getContext("2d");//ctx short for context
+    let x = canvas.width / 2;// half canvas width
+    let y = canvas.height - 20;
+    let drawX = 2;
+    let drawY = -2;
+
+    // Collision Detection
+    let ballRadius = 10;
+    // Paddle
+    let paddleHeight = 10;
+    let paddleWidth = 75;
+    let paddleX = (canvas.width - paddleWidth) / 2;
+    let rightPressed = false;
+    let leftPressed = false;
+    function drawBall(){
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
+    ctx.fillStyle="green";
+    ctx.fill();
+    ctx.closePath();
+    }
+    
+    function drawPaddle(){
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+        ctx.fillStyle ="#0095dd";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function draw(){
+    //Drawing Code
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall();
+    drawPaddle();
+
+    if(y + drawY < 0 || y + drawY > canvas.height - ballRadius){
+        drawY = -drawY;
+    }
+    if(x + drawX > canvas.width - ballRadius || x + drawX < 0){
+        drawX = -drawX;
+    }//MDN note:When the distance between the center of the ball and the edge of the wall is exactly the same as the radius of the ball, it will change the movement direction.
+    if(rightPressed){
+        paddleX += 7;
+        if(paddleX + paddleWidth > canvas.width){
+            paddleX = canvas.width -paddleWidth;
+        }
+    }else if(leftPressed){
+        paddleX -= 7;
+        if(paddleX < 0){
+            paddleX = 0;
+        }
+    }
+        x += drawX;
+        y += drawY;
+    }
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+
+    //Key Down Handler
+    function keyDownHandler(i){
+        if(i.key == "Right" || i.key == "ArrowRight"){
+            rightPressed = true;
+        }else if(i.key == "Left" || i.key == "ArrowLeft"){
+            leftPressed = true;
+        }
+    }
+    // Key Up Handler
+    function keyUpHandler(i){
+        if(i.key == "Right" || i.key == "ArrowRight"){
+            rightPressed = false;
+        }else if(i.key == "Left" || i.key == "ArrowLeft"){
+            leftPressed =false;
+  }
+    }
+    
+    setInterval(draw, 10);//every 10 milliseconds 
+    
+   </script> 
+</body>   
+</html>
