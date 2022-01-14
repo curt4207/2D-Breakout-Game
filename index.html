@@ -32,7 +32,55 @@
     let paddleX = (canvas.width - paddleWidth) / 2;
     let rightPressed = false;
     let leftPressed = false;
-    function drawBall(){
+    
+    //Brick Variables 
+    let brickRowCount = 3;
+    let brickColumnCount = 5;
+    let brickWidth = 75;
+    let brickHeight =20;
+    let brickPadding = 10;
+    let brickOffsetTop = 30;
+    let brickOffsetLeft =30;
+
+    //Bricks are in a Two-dimensional array 
+    let bricks = [];
+    for(let c = 0; c < brickColumnCount; c++){
+        bricks[c] = [];
+        for(let r = 0; r < brickRowCount; r++){
+            bricks[c][r] = {x: 0, y: 0, status: 1};
+        }
+    }
+    /*Collision Detection: These Must be True.
+     1.The x position of the ball is greater than the x position of the brick.
+     2. The x position of the ball is less than the x position of the brick plus its width.
+     
+     3. the y position of the ball is greater than the y position of the brick.
+     4. the y position of hte ball is less than the y position of the brick plus its height. 
+     */
+
+    
+
+    function drawBricks(){
+        for(let c =0; c < brickColumnCount; c++){
+            for(let r =0; r < brickRowCount; r++){
+              if(bricks[c][r].status == 1){  
+                let brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                let brickY = (r *(brickHeight + brickPadding)) + brickOffsetTop;
+
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = "#0095dd";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+}
+
+    
+    function drawBall(){//The Math.PI property represents the ratio of the circumference of a circle to its diameter, approximately 3.14159:
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
     ctx.fillStyle="green";
@@ -43,37 +91,13 @@
     function drawPaddle(){
         ctx.beginPath();
         ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-        ctx.fillStyle ="#0095dd";
+        ctx.fillStyle ="rgb(255, 55, 255)"; 
         ctx.fill();
         ctx.closePath();
     }
 
-    function draw(){
-    //Drawing Code
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall();
-    drawPaddle();
+   
 
-    if(y + drawY < 0 || y + drawY > canvas.height - ballRadius){
-        drawY = -drawY;
-    }
-    if(x + drawX > canvas.width - ballRadius || x + drawX < 0){
-        drawX = -drawX;
-    }//MDN note:When the distance between the center of the ball and the edge of the wall is exactly the same as the radius of the ball, it will change the movement direction.
-    if(rightPressed){
-        paddleX += 7;
-        if(paddleX + paddleWidth > canvas.width){
-            paddleX = canvas.width -paddleWidth;
-        }
-    }else if(leftPressed){
-        paddleX -= 7;
-        if(paddleX < 0){
-            paddleX = 0;
-        }
-    }
-        x += drawX;
-        y += drawY;
-    }
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
@@ -93,9 +117,59 @@
             leftPressed =false;
   }
     }
+    function collisionDetection(){
+        for(let c = 0; c < brickColumnCount; c++){
+            for(let r = 0; r < brickRowCount; r++){
+                let b = bricks[c][r];
+                if(b.status == 1){
+                if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight){
+                drawY = -drawY;
+                    b.status = 0;
+                }
+            }
+        }
+    }
+}
+
+function draw(){
+    //Drawing Code
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBall();
+    drawPaddle();
+    collisionDetection();
+
+    if(x + drawX > canvas.width - ballRadius || x + drawX < ballRadius){
+        drawX = -drawX;
+    }
+    if(y + drawY <  ballRadius){
+        drawY = -drawY;
+    }
+    else if(y + drawY > canvas.height - ballRadius){
+        if(x > paddleX && x < paddleX + paddleWidth){
+            drawY = -drawY;
+        }
+        else{
+        alert("GAME OVER");
+        document.location.reload();
+        clearInterval(interval);
+        }
+    }
     
-    setInterval(draw, 10);//every 10 milliseconds 
+    //MDN note:When the distance between the center of the ball and the edge of the wall is exactly the same as the radius of the ball, it will change the movement direction.
+    if(rightPressed && paddleX < canvas.width - paddleWidth){
+        paddleX += 7;
+    }
+    else if(leftPressed && paddleX > 0){
+        paddleX -= 7;
+    }
+        x += drawX;
+        y += drawY;
+ }
+
+    let interval = setInterval(draw, 10);//every 10 milliseconds 
     
    </script> 
 </body>   
 </html>
+<!-- next: track score/ Make ball chang color when it hits a block/ change block colors .-->
